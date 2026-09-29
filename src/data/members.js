@@ -167,6 +167,7 @@ export const MEMBERS = [
   { id: "cravity-minhee", name: "Minhee", zh: "珉熙", group: "CRAVITY", birth: "2002-09-17" },
   { id: "cravity-hyeongjun", name: "Hyeongjun", zh: "刑准", group: "CRAVITY", birth: "2002-11-30" },
   { id: "cravity-taeyoung", name: "Taeyoung", zh: "太荣", group: "CRAVITY", birth: "2003-01-27" },
+  { id: "cravity-seongmin", name: "Seongmin", zh: "性珉", group: "CRAVITY", birth: "2003-08-01" },
   { id: "ald1-junseo", name: "Junseo", zh: "金俊抒", group: "ALD1", birth: "2001-11-20" },
   { id: "ald1-arno", name: "Arno", zh: "张家豪", group: "ALD1", birth: "2002-07-07" },
   { id: "ald1-leo", name: "Leo", zh: "李理悟", group: "ALD1", birth: "2002-08-22" },

@@ -47,7 +47,7 @@ export const MEMBERS = [
   { id: "tws-dohoon", name: "Dohoon", zh: "道勋", group: "TWS", birth: "2005-01-30" },
   { id: "tws-youngjae", name: "Youngjae", zh: "英宰", group: "TWS", birth: "2005-05-31" },
   { id: "tws-hanjin", name: "Hanjin", zh: "韩振", group: "TWS", birth: "2006-01-05" },
-  { id: "tws-jihoon", name: "Jihoon", zh: "韩志薰", group: "TWS", birth: "2006-06-28" },
+  { id: "tws-jihoon", name: "Jihoon", zh: "韩志薰", group: "TWS", birth: "2006-03-28" },
   { id: "tws-kyungmin", name: "Kyungmin", zh: "炅潣", group: "TWS", birth: "2006-11-04" },
   { id: "nct-johnny", name: "Johnny", zh: "徐煐淏", group: "NCT", birth: "1995-02-09" },
   { id: "nct-taeyong", name: "Taeyong", zh: "李泰容", group: "NCT", birth: "1995-07-01" },

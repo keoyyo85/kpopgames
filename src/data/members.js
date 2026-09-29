@@ -55,7 +55,7 @@ export const MEMBERS = [
   { id: "nct-doyoung", name: "Doyoung", zh: "金道英", group: "NCT", birth: "1996-02-01" },
   { id: "nct-jaehyun", name: "Jaehyun", zh: "郑在玹", group: "NCT", birth: "1997-02-14" },
   { id: "nct-jungwoo", name: "Jungwoo", zh: "金廷祐", group: "NCT", birth: "1998-02-19" },
-  { id: "nct-mark", name: "Mark", zh: "李敏亨", group: "NCT", birth: "1999-08-02" },
+  { id: "nct-mark", name: "Mark", zh: "李马克", group: "SOLO", birth: "1999-08-02" },
   { id: "nct-renjun", name: "Renjun", zh: "黄仁俊", group: "NCT", birth: "2000-03-23" },
   { id: "nct-jeno", name: "Jeno", zh: "李帝努", group: "NCT", birth: "2000-04-23" },
   { id: "nct-haechan", name: "Haechan", zh: "李楷灿", group: "NCT", birth: "2000-06-06" },

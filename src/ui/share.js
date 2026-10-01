@@ -46,20 +46,6 @@ function roundRect(ctx, x, y, w, h, r) {
   ctx.closePath();
 }
 
-function chip(ctx, text, x, y, { bg, fg, fs = 26, padX = 20, h = 48, bold = 600 }) {
-  ctx.font = `${bold} ${fs}px ${FONT}`;
-  const w = Math.ceil(ctx.measureText(text).width) + padX * 2;
-  ctx.fillStyle = bg;
-  roundRect(ctx, x, y, w, h, h / 2);
-  ctx.fill();
-  ctx.fillStyle = fg;
-  ctx.textAlign = 'left';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(text, x + padX, y + h / 2 + 2);
-  ctx.textBaseline = 'alphabetic';
-  return w;
-}
-
 function centerText(ctx, text, y, { fs, weight = 700, color = C.ink, spacing = '' }) {
   ctx.font = `${weight} ${fs}px ${FONT}`;
   if (spacing) ctx.letterSpacing = spacing;
@@ -319,7 +305,14 @@ function showShareModal(canvases) {
         el('b', {}, '分享图已生成'),
         el('span', {}, '手机长按图片可保存；电脑点「下载」')
       ),
-      el('button', { class: 'share-modal__close', type: 'button', onclick: close }, '完成')
+      el('div', { class: 'share-modal__acts' },
+        el('button', {
+          class: 'share-modal__btn',
+          type: 'button',
+          onclick: () => copyShareText(),
+        }, '复制文案'),
+        el('button', { class: 'share-modal__btn share-modal__btn--solid', type: 'button', onclick: close }, '完成')
+      )
     ),
     el('div', { class: 'share-modal__scroll' },
       canvases.map((canvas, i) =>
@@ -344,7 +337,8 @@ function showShareModal(canvases) {
 
 /* ---------------- 对外入口 ---------------- */
 
-export function generateShareImages() {
+// 结果页「分享到小红书」按钮的唯一入口：生成分享图并弹出保存面板
+export function openShare() {
   const members = selectedMembers();
   const n = members.length;
   const pages = Math.ceil(n / 6);

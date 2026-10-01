@@ -990,17 +990,28 @@ b {
   color: var(--ink-2);
 }
 
-.share-modal__close {
+.share-modal__acts {
   flex: none;
-  background: var(--ink);
-  color: #fff;
-  font-size: 13.5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.share-modal__btn {
+  background: var(--card);
+  color: var(--ink);
+  font-size: 13px;
   font-weight: 700;
-  padding: 9px 18px;
+  padding: 9px 16px;
   border-radius: 99px;
 }
 
-.share-modal__close:active {
+.share-modal__btn--solid {
+  background: var(--ink);
+  color: #fff;
+}
+
+.share-modal__btn:active {
   transform: scale(0.95);
 }
 

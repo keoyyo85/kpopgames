@@ -3,6 +3,7 @@ import { el } from './dom.js';
 import { iconSpark } from './icons.js';
 import { displayGroup } from '../data/members.js';
 import { getState, selectedMembers, positionsOf, editRoster, resetAll } from '../state.js';
+import { generateShareImages, copyShareText } from './share.js';
 
 export function render() {
   const { teamName } = getState();
@@ -46,6 +47,18 @@ export function render() {
 
   return el('section', { class: 'step step-result' },
     card,
+    el('div', { class: 'resultbtns resultbtns--share' },
+      el('button', {
+        class: 'btn btn--primary',
+        type: 'button',
+        onclick: () => generateShareImages(),
+      }, '生成小红书分享图'),
+      el('button', {
+        class: 'btn btn--ghost',
+        type: 'button',
+        onclick: () => copyShareText(),
+      }, '复制出道文案')
+    ),
     el('div', { class: 'resultbtns' },
       el('button', {
         class: 'btn btn--ghost',

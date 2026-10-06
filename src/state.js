@@ -1,9 +1,10 @@
 // 游戏状态与规则逻辑。UI 只调用这里的 action，不直接改内部数据。
-import { MEMBERS, memberById, displayGroup } from './data/members.js';
+import { membersForMode, memberById, displayGroup } from './data/members.js';
 import { positionByLabel, MAKNAE_LABEL } from './data/positions.js';
 
 const state = {
-  step: 1, // 1 选人数 2 选成员 3 分配定位 4 取团名 5 结果页
+  step: 0, // 0 选玩法 1 人数 2 成员 3 定位 4 团名 5 结果
+  mode: null,
   size: 5,
   selected: [], // 按点选顺序保存的成员 id，天然不会重复
   positions: {}, // memberId -> [定位label, ...]
@@ -94,6 +95,7 @@ export function setSize(n) {
 
 // 选择 / 取消成员。超过人数上限时给出提示并拒绝。
 export function toggleMember(id) {
+  if (!membersForMode(state.mode).some(m => m.id === id)) return false;
   const idx = state.selected.indexOf(id);
   if (idx >= 0) {
     state.selected.splice(idx, 1);
@@ -149,8 +151,8 @@ export function goto(step) {
 }
 
 export function goBack() {
-  const prev = { 2: 1, 3: 2, 4: 3, 5: 4 }[state.step];
-  if (prev) goto(prev);
+  const prev = { 1: 0, 2: 1, 3: 2, 4: 3, 5: 4 }[state.step];
+  if (prev !== undefined) goto(prev);
 }
 
 // 从结果页回 Step 2 改阵容：已选成员与定位全部保留
@@ -162,7 +164,8 @@ export function editRoster() {
 
 // 重新组团：清空上一局的一切
 export function resetAll() {
-  state.step = 1;
+  state.step = 0;
+  state.mode = null;
   state.size = 5;
   state.selected = [];
   state.positions = {};
@@ -172,3 +175,17 @@ export function resetAll() {
 }
 
 export { displayGroup };
+export function setMode(mode) {
+  if (!['boys', 'girls'].includes(mode)) return;
+  if (!membersForMode(mode).length) {
+    toast('女团成员名单正在准备中');
+    return;
+  }
+  if (state.mode !== mode) {
+    state.selected = [];
+    state.positions = {};
+    state.teamName = '';
+  }
+  state.mode = mode;
+  goto(1);
+}

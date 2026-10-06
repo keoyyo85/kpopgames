@@ -64,7 +64,8 @@ export function render() {
 
   const node = el('section', { class: 'step step-pos' },
     el('p', { class: 'lead lead--pos' },
-      '点标签安排定位，一人可以身兼多个；', el('b', {}, '不用全部填满'), '。队长 / Center / Face of the Group 每个全团限 1 人。'),
+      '点标签安排定位，一人可以身兼多个；', el('b', {}, '不用全部填满'), '。队长 / Center / Face of the Group 每个全团限 1 人。',
+      members.some(m => !m.birth) ? ' 部分成员暂无生日，忙内可手动选择。' : ''),
     list,
     el('footer', { class: 'actionbar' },
       el('button', {

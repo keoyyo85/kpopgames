@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "重生之我组男团 — 自由从现有 K-pop 男团里挑人、排定位、给新团起名的组建小游戏（粉丝二创，纯文字）",
+  "description": "重生之我组kpop团体 — 自由从现有 K-pop 男团里挑人、排定位、给新团起名的组建小游戏（粉丝二创，纯文字）",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

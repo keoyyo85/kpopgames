@@ -17,9 +17,9 @@ export function render() {
   });
 
   const preview = el('div', { class: 'namepreview' },
-    el('span', { class: 'namepreview__tag' }, 'NEW BOY GROUP'),
+    el('span', { class: 'namepreview__tag' }, 'NEW KPOP GROUP'),
     el('span', { class: 'namepreview__name' }, state.teamName.trim() || '你的新团名'),
-    el('span', { class: 'namepreview__sub' }, '这是你亲手组建的新男团。')
+    el('span', { class: 'namepreview__sub' }, '这是你亲手组建的新团体。')
   );
 
   const lenLabel = el('span', { class: 'nameinput__len' }, `${state.teamName.length}/${MAX_LEN}`);

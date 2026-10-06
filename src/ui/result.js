@@ -42,7 +42,7 @@ export function render() {
       ),
       el('ol', { class: 'roster' }, rows)
     ),
-    el('p', { class: 'profilecard__slogan' }, '这是你组建的男团！')
+    el('p', { class: 'profilecard__slogan' }, '这是你组建的团体！')
   );
 
   return el('section', { class: 'step step-result' },

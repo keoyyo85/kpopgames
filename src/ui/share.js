@@ -1,28 +1,35 @@
-// 小红书分享：Canvas 绘制 3:4 分享图（封面卡 + 出道名单卡）+ 复制文案
-// 全部用系统字体手绘，不依赖图片资源和第三方库。
+// 小红书分享：Canvas 绘制 3:4 分享图（封面卡 + 出道名单卡）
+// 全部用系统字体手绘，不依赖图片资源和第三方库；容器内走 window.xhs.miniTool 端能力。
 import { el } from './dom.js';
 import { displayGroup } from '../data/members.js';
 import { getState, selectedMembers, positionsOf } from '../state.js';
 import { toast } from './shell.js';
+import {
+  supportsPostNote,
+  supportsSaveToAlbum,
+  toFilePaths,
+  saveImageToAlbum,
+  postNote,
+} from '../xhs.js';
 
 const W = 1080;
 const H = 1440; // 3:4，小红书标准竖图比例
 const FONT = "'PingFang SC','HarmonyOS Sans SC','Microsoft YaHei',sans-serif";
 
 const C = {
-  bg: '#e7f1f2',
-  card: '#fbfdfc',
-  ink: '#203b40',
-  ink2: '#657c80',
-  accent: '#075565',
-  line: '#dfeaec',
-  lilac: '#e9d4ed',
-  lavender: '#d8d4ed',
-  green: '#d6e8cc',
-  blue: '#cce5eb',
+  bg: '#efefef',
+  card: '#ffffff',
+  ink: '#161616',
+  ink2: '#696969',
+  accent: '#161616',
+  line: '#dddddd',
+  lilac: '#e7e7e7',
+  lavender: '#dedede',
+  green: '#f0f0f0',
+  blue: '#d7d7d7',
 };
 const CHIP_COLORS = [C.lilac, C.lavender, C.green, C.blue];
-const CHIP_INKS = ['#57465f', '#493e6a', '#3f5d43', '#2f5a63'];
+const CHIP_INKS = ['#333333', '#333333', '#333333', '#333333'];
 
 /* ---------------- canvas 基础工具 ---------------- */
 
@@ -96,7 +103,7 @@ function paintBg(ctx, { blobs = true } = {}) {
 }
 
 function paintFooter(ctx, y) {
-  centerText(ctx, '#重生之我组男团 · 粉丝二创小游戏', y, {
+  centerText(ctx, '#重生之我组kpop团体 · 粉丝二创小游戏', y, {
     fs: 26, weight: 600, color: C.ink2, spacing: '2px',
   });
 }
@@ -120,12 +127,12 @@ function drawCover() {
   ctx.stroke();
 
   let y = 300;
-  centerText(ctx, '重生之我组男团 · DEBUT PROFILE', y, {
+  centerText(ctx, '重生之我组kpop团体 · DEBUT PROFILE', y, {
     fs: 28, weight: 800, color: C.accent, spacing: '10px',
   });
 
   // 团名
-  const { lines, fs } = fitTeamName(ctx, teamName.trim() || '未命名男团');
+  const { lines, fs } = fitTeamName(ctx, teamName.trim() || '未命名团体');
   y += 130 + (lines.length - 1) * (fs * 1.16);
   for (const line of lines) {
     centerText(ctx, line, y, { fs, weight: 800, spacing: '4px' });
@@ -191,10 +198,10 @@ function drawCover() {
     chipsEnd + 96,
     chipsEnd + ((cardBottom - 130 - chipsEnd) * 2) / 3
   );
-  centerText(ctx, '这是你组建的男团！', sloganY, {
+  centerText(ctx, '这是你组建的团体！', sloganY, {
     fs: 42, weight: 800, color: C.accent, spacing: '4px',
   });
-  centerText(ctx, '你也来组一个，评论区交出你的梦中男团', sloganY + 72, {
+  centerText(ctx, '你也来组一个，评论区交出你的梦中团体', sloganY + 72, {
     fs: 28, weight: 500, color: C.ink2,
   });
   paintFooter(ctx, H - 122);
@@ -289,46 +296,93 @@ function drawRosterPage(chunk, allCount, pageIdx, pageCount, offset) {
   return canvas;
 }
 
-/* ---------------- 弹窗展示 ---------------- */
+/* ---------------- 分享面板 ---------------- */
 
-function showShareModal(canvases) {
-  document.querySelector('.share-modal')?.remove();
+// 容器内：存相册 + 直接唤起笔记发布页；普通浏览器：预览图片（长按保存）+ 可选中文案
+function showSharePanel(canvases) {
+  const old = document.querySelector('.share-modal');
+  if (old && old.parentNode) old.parentNode.removeChild(old);
+
+  const mount = document.getElementById('app') || document.body;
+  const dataUrls = canvases.map((canvas) => canvas.toDataURL('image/png'));
+  const canPost = supportsPostNote();
+  const canSaveAlbum = supportsSaveToAlbum();
+  const caption = buildShareText();
+  const title = buildShareTitle();
 
   const close = () => {
     overlay.remove();
     document.body.classList.remove('share-modal-open');
   };
 
+  const actions = [];
+
+  if (canPost) {
+    actions.push(el('button', {
+      class: 'share-modal__footbtn',
+      type: 'button',
+      onclick: () => {
+        toFilePaths(dataUrls).then((paths) =>
+          postNote({ title, content: caption, images: paths })
+            .then(() => toast('已打开笔记发布页'))
+            .catch(() => toast('发布页唤起失败，可先用「存相册」再手动发笔记'))
+        );
+      },
+    }, '去发笔记'));
+  }
+
+  if (canSaveAlbum) {
+    actions.push(el('button', {
+      class: 'share-modal__footbtn',
+      type: 'button',
+      onclick: () => {
+        // 逐张保存，避免并发触发系统相册授权
+        toFilePaths(dataUrls)
+          .then((paths) =>
+            paths.reduce(
+              (chain, path) => chain.then(() => saveImageToAlbum(path)).catch(() => null),
+              Promise.resolve()
+            )
+          )
+          .then(() => toast('已保存到相册 ✨'))
+          .catch(() => toast('保存失败，请重试'));
+      },
+    }, '存到相册'));
+  }
+
+  actions.push(el('button', {
+    class: 'share-modal__footbtn share-modal__footbtn--solid',
+    type: 'button',
+    onclick: close,
+  }, '完成'));
+
   const overlay = el('div', { class: 'share-modal' },
     el('div', { class: 'share-modal__bar' },
       el('div', { class: 'share-modal__barText' },
-        el('b', {}, '分享图已生成'),
-        el('span', {}, '手机长按图片可保存；电脑点「下载」')
-      ),
-      el('div', { class: 'share-modal__acts' },
-        el('button', {
-          class: 'share-modal__btn',
-          type: 'button',
-          onclick: () => copyShareText(),
-        }, '复制文案'),
-        el('button', { class: 'share-modal__btn share-modal__btn--solid', type: 'button', onclick: close }, '完成')
+        el('b', {}, '分享到小红书'),
+        el('span', {},
+          canPost || canSaveAlbum
+            ? '图片可直接存相册或带到笔记发布页'
+            : '长按图片可保存，文案可长按选中复制')
       )
     ),
     el('div', { class: 'share-modal__scroll' },
-      canvases.map((canvas, i) =>
-        el('div', { class: 'share-modal__item' },
-          el('img', { src: canvas.toDataURL('image/png'), alt: `小红书分享图 ${i + 1}` }),
-          el('a', {
-            class: 'btn btn--ghost share-modal__dl',
-            href: canvas.toDataURL('image/png'),
-            download: `重生之我组男团-分享图${canvases.length > 1 ? i + 1 : ''}.png`,
-          }, `下载第 ${i + 1} 张`)
+      el('div', { class: 'share-modal__preview' },
+        dataUrls.map((url, i) =>
+          el('div', { class: 'share-modal__item' },
+            el('img', { src: url, alt: `分享图 ${i + 1}` })
+          )
         )
+      ),
+      el('div', { class: 'share-modal__caption' },
+        el('p', { class: 'share-modal__captionTitle' }, '笔记文案'),
+        el('p', { class: 'share-modal__captionText' }, caption)
       )
-    )
+    ),
+    el('footer', { class: 'share-modal__foot' }, actions)
   );
 
-  document.body.append(overlay);
+  mount.append(overlay);
   document.body.classList.add('share-modal-open');
   overlay.addEventListener('click', (e) => {
     if (e.target === overlay) close();
@@ -337,7 +391,7 @@ function showShareModal(canvases) {
 
 /* ---------------- 对外入口 ---------------- */
 
-// 结果页「分享到小红书」按钮的唯一入口：生成分享图并弹出保存面板
+// 结果页「分享到小红书」按钮的唯一入口：生成分享图并弹出分享面板
 export function openShare() {
   const members = selectedMembers();
   const n = members.length;
@@ -353,12 +407,21 @@ export function openShare() {
     remaining -= take;
   }
   const canvases = [drawCover()];
-  chunks.forEach(({ list, offset: off }, i) =>
-    canvases.push(drawRosterPage(list, n, i, pages, off))
+  chunks.forEach((entry, i) =>
+    canvases.push(drawRosterPage(entry.list, n, i, pages, entry.offset))
   );
-  showShareModal(canvases);
+  showSharePanel(canvases);
 }
 
+// 笔记标题（postNote.title 最长 20 字）
+export function buildShareTitle() {
+  const { teamName } = getState();
+  const name = teamName.trim() || '未命名';
+  const title = `我组的新团「${name}」出道了`;
+  return title.length > 20 ? title.slice(0, 19) + '…' : title;
+}
+
+// 笔记正文（postNote.content 最长 1000 字；容器禁止剪贴板，故同时用于可选中文本展示）
 export function buildShareText() {
   const { teamName } = getState();
   const members = selectedMembers();
@@ -370,30 +433,13 @@ export function buildShareText() {
   });
 
   return [
-    `【重生之我组男团】我的新团「${name}」今日出道！🎤`,
+    `【重生之我组kpop团体】我的新团「${name}」今日出道！`,
     '',
-    ...lines,
+    lines.join('\n'),
     '',
-    '这个阵容打几分？评论区交出你的梦中男团👇',
+    '这个阵容打几分？评论区交出你的梦中团体。',
     '',
-    '#重生之我组男团 #kpop #男团企划 #梦中情团 #粉丝二创',
+    '#重生之我组kpop团体 #kpop #团体企划 #梦中情团 #粉丝二创',
   ].join('\n');
 }
 
-export async function copyShareText() {
-  const text = buildShareText();
-  try {
-    await navigator.clipboard.writeText(text);
-    toast('文案已复制，去小红书粘贴吧 ✨');
-  } catch {
-    // 兼容非 https / 旧浏览器
-    const ta = document.createElement('textarea');
-    ta.value = text;
-    ta.style.cssText = 'position:fixed;opacity:0;';
-    document.body.append(ta);
-    ta.select();
-    const ok = document.execCommand('copy');
-    ta.remove();
-    toast(ok ? '文案已复制，去小红书粘贴吧 ✨' : '复制失败，请手动长按复制');
-  }
-}

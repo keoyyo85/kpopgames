@@ -14,6 +14,7 @@
 // 新加一个团时，记得把团名加进下面的 GROUP_ORDER（决定筛选栏顺序）。
 // ============================================================
 
+import { GIRLS } from './girls.js';
 export const MEMBERS = [
   { id: "boynextdoor-sungho", name: "Sungho", zh: "朴成淏", group: "BOYNEXTDOOR", birth: "2003-09-04" },
   { id: "boynextdoor-riwoo", name: "Riwoo", zh: "李常赫", group: "BOYNEXTDOOR", birth: "2003-10-22" },
@@ -229,7 +230,11 @@ export function displayGroup(group) {
   return group === 'SOLO' ? '个人活动' : group;
 }
 
-const byId = new Map(MEMBERS.map((m) => [m.id, m]));
+export function membersForMode(mode) { return mode === 'girls' ? GIRLS : MEMBERS; }
+export function groupsForMode(mode) {
+  return mode === 'girls' ? [...new Set(GIRLS.map(m => m.group))] : GROUPS;
+}
+const byId = new Map([...MEMBERS, ...GIRLS].map((m) => [m.id, m]));
 
 export function memberById(id) {
   return byId.get(id);

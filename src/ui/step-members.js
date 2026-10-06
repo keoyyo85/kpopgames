@@ -1,7 +1,7 @@
 // Step 2 · 选择成员（搜索 / 按团筛选 / 已选成员固定显示 / 人数上限）
-import { el } from './dom.js';
+import { el, clearNode } from './dom.js';
 import { iconSearch, iconCheck, iconClose } from './icons.js';
-import { MEMBERS, GROUPS, displayGroup } from '../data/members.js';
+import { membersForMode, groupsForMode, displayGroup } from '../data/members.js';
 import {
   getState,
   subscribe,
@@ -52,7 +52,7 @@ export function render() {
       onclick: () => setGroup('all'),
     }, '全部')
   );
-  for (const g of GROUPS) {
+  for (const g of groupsForMode(state.mode)) {
     chips.append(
       el('button', {
         class: 'gchip',
@@ -73,7 +73,7 @@ export function render() {
   const grid = el('div', { class: 'mgrid' });
 
   function visibleMembers() {
-    return MEMBERS.filter((m) => {
+    return membersForMode(state.mode).filter((m) => {
       if (group !== 'all' && m.group !== group) return false;
       if (!query) return true;
       return (
@@ -87,7 +87,7 @@ export function render() {
 
   function renderGrid() {
     const list = visibleMembers();
-    grid.replaceChildren();
+    clearNode(grid);
     if (!list.length) {
       grid.append(el('div', { class: 'mgrid__empty' }, `没有找到 “${input.value.trim()}”`));
       return;
@@ -120,7 +120,7 @@ export function render() {
   function renderPickedChips() {
     const list = selectedMembers();
     pickedCount.textContent = list.length;
-    pickedChips.replaceChildren();
+    clearNode(pickedChips);
     pickedEmpty.style.display = list.length ? 'none' : '';
     for (const m of list) {
       pickedChips.append(

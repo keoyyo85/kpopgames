@@ -1,14 +1,19 @@
 import './styles.css';
+import './glass.css';
 
 import { getState, subscribe, bindToast } from './state.js';
 import { initShell, renderHeader, toast } from './ui/shell.js';
+import { clearNode } from './ui/dom.js';
+import { applyCompatFlags } from './ui/compat.js';
 import * as stepSize from './ui/step-size.js';
+import * as stepMode from './ui/step-mode.js';
 import * as stepMembers from './ui/step-members.js';
 import * as stepPositions from './ui/step-positions.js';
 import * as stepName from './ui/step-name.js';
 import * as stepResult from './ui/result.js';
 
 const STEPS = {
+  0: stepMode,
   1: stepSize,
   2: stepMembers,
   3: stepPositions,
@@ -16,7 +21,7 @@ const STEPS = {
   5: stepResult,
 };
 
-let currentStep = 0;
+let currentStep = -1;
 
 function renderStep() {
   const state = getState();
@@ -24,7 +29,7 @@ function renderStep() {
 
   const old = view.firstElementChild;
   if (old) old.dispatchEvent(new CustomEvent('unmount'));
-  view.replaceChildren();
+  clearNode(view);
 
   const node = STEPS[state.step].render();
   node.classList.add('step--enter', state.direction === 'back' ? 'step--back' : 'step--fwd');
@@ -38,6 +43,8 @@ function renderStep() {
 }
 
 const app = document.getElementById('app');
+// 能力检测须在核心页面渲染前执行
+applyCompatFlags();
 initShell(app);
 bindToast(toast);
 
